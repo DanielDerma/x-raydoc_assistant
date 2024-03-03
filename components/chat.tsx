@@ -107,7 +107,7 @@ export function CardsChat() {
               <p className="text-sm text-muted-foreground">m@example.com</p>
             </div>
           </div>
-          <TooltipProvider delayDuration={0}>
+          {/* <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -122,9 +122,9 @@ export function CardsChat() {
               </TooltipTrigger>
               <TooltipContent sideOffset={10}>New message</TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider> */}
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-96 overflow-y-scroll">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -226,7 +226,7 @@ export function CardsChat() {
               </CommandGroup>
             </CommandList>
           </Command>
-          <DialogFooter className="flex items-center border-t p-4 sm:justify-between">
+          {/* <DialogFooter className="flex items-center border-t p-4 sm:justify-between">
             {selectedUsers.length > 0 ? (
               <div className="flex -space-x-2 overflow-hidden">
                 {selectedUsers.map((user) => (
@@ -252,7 +252,7 @@ export function CardsChat() {
             >
               Continue
             </Button>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </Dialog>
     </>

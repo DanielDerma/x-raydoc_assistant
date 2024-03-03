@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { CardsChat } from "./chat"
 
 export function Chat() {
   const [open, setOpen] = React.useState(false)
@@ -17,7 +18,7 @@ export function Chat() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button onClick={() => setOpen(!open)} className="rounded-full w-16 h-16">
+        <Button onClick={() => setOpen(!open)} className="absolute right-6 bottom-6 rounded-full w-16 h-16">
           {
             open
               ? <Cross1Icon className="w-6 h-6" />
@@ -25,49 +26,8 @@ export function Chat() {
           }
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dimensions</h4>
-            <p className="text-sm text-muted-foreground">
-              Set the dimensions for the layer.
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="width">Width</Label>
-              <Input
-                id="width"
-                defaultValue="100%"
-                className="col-span-2 h-8"
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxWidth">Max. width</Label>
-              <Input
-                id="maxWidth"
-                defaultValue="300px"
-                className="col-span-2 h-8"
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="height">Height</Label>
-              <Input
-                id="height"
-                defaultValue="25px"
-                className="col-span-2 h-8"
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="maxHeight">Max. height</Label>
-              <Input
-                id="maxHeight"
-                defaultValue="none"
-                className="col-span-2 h-8"
-              />
-            </div>
-          </div>
-        </div>
+      <PopoverContent className="w-80 mr-6 mb-6" onCloseAutoFocus={() => setOpen(false)}>
+        <CardsChat />
       </PopoverContent>
     </Popover>
   )

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { CheckIcon, PaperPlaneIcon, PlusIcon } from "@radix-ui/react-icons"
+import { CheckIcon, PaperPlaneIcon, ImageIcon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
 import {
@@ -100,11 +100,11 @@ export function CardsChat() {
           <div className="flex items-center space-x-4">
             <Avatar>
               <AvatarImage src="/avatars/01.png" alt="Image" />
-              <AvatarFallback>OM</AvatarFallback>
+              <AvatarFallback>XA</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium leading-none">Sofia Davis</p>
-              <p className="text-sm text-muted-foreground">m@example.com</p>
+              <p className="text-sm font-medium leading-none">X-RayDoc Assistant</p>
+              <a target="_blank" href="https://www.google.com/maps" className="text-sm text-muted-foreground underline">Open Source Colab Docs</a>
             </div>
           </div>
           {/* <TooltipProvider delayDuration={0}>
@@ -130,7 +130,7 @@ export function CardsChat() {
               <div
                 key={index}
                 className={cn(
-                  "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                  "flex w-max max-w-[75%] flex-col gap-2 rounded-md px-3 py-2 text-sm",
                   message.role === "user"
                     ? "ml-auto bg-primary text-primary-foreground"
                     : "bg-muted"
@@ -157,6 +157,15 @@ export function CardsChat() {
             }}
             className="flex w-full items-center space-x-2"
           >
+            <div className="">
+              <label htmlFor="attact-image">
+                <input type="file" accept=".jpg, .png" id="attact-image" className="bg-transparent hidden" />
+                <Button type="button" size="icon" className="bg-transparent">
+                  <ImageIcon className="h-4 w-4" />
+                  <span className="sr-only">Attach Image</span>
+                </Button>
+              </label>
+            </div>
             <Input
               id="message"
               placeholder="Type your message..."

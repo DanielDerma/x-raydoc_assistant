@@ -1,7 +1,6 @@
+import { ImageIcon, PaperPlaneIcon } from "@radix-ui/react-icons"
 import * as React from "react"
-import { CheckIcon, PaperPlaneIcon, ImageIcon } from "@radix-ui/react-icons"
 
-import { cn } from "@/lib/utils"
 import {
   Avatar,
   AvatarFallback,
@@ -14,6 +13,18 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+
+import { Input } from "./ui/input"
+import {
+  CalendarIcon,
+  EnvelopeClosedIcon,
+  FaceIcon,
+  GearIcon,
+  PersonIcon,
+  RocketIcon,
+} from "@radix-ui/react-icons"
+
 import {
   Command,
   CommandEmpty,
@@ -21,74 +32,29 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
+  CommandShortcut,
 } from "@/components/ui/command"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
-const users = [
+const commands = [
   {
-    name: "Olivia Martin",
-    email: "m@example.com",
-    avatar: "/avatars/01.png",
+    command: "/key_kaggle",
+    description: "Get Kaggle API Key",
   },
   {
-    name: "Isabella Nguyen",
-    email: "isabella.nguyen@email.com",
-    avatar: "/avatars/03.png",
-  },
-  {
-    name: "Emma Wilson",
-    email: "emma@example.com",
-    avatar: "/avatars/05.png",
-  },
-  {
-    name: "Jackson Lee",
-    email: "lee@example.com",
-    avatar: "/avatars/02.png",
-  },
-  {
-    name: "William Kim",
-    email: "will@email.com",
-    avatar: "/avatars/04.png",
+    command: "/key_colab",
+    description: "Get G Colab API Key",
   },
 ] as const
 
-type User = (typeof users)[number]
+type Command = (typeof commands)[number]
 
 export function CardsChat() {
-  const [open, setOpen] = React.useState(false)
-  const [selectedUsers, setSelectedUsers] = React.useState<User[]>([])
-
   const [messages, setMessages] = React.useState([
     {
       role: "agent",
-      content: "Hi, how can I help you today?",
-    },
-    {
-      role: "user",
-      content: "Hey, I'm having trouble with my account.",
-    },
-    {
-      role: "agent",
-      content: "What seems to be the problem?",
-    },
-    {
-      role: "user",
-      content: "I can't log in.",
-    },
+      content: "To get started, type /key_kaggle and /key_colab.",
+    }
   ])
   const [input, setInput] = React.useState("")
   const inputLength = input.trim().length
@@ -107,22 +73,6 @@ export function CardsChat() {
               <a target="_blank" href="https://www.google.com/maps" className="text-sm text-muted-foreground underline">Open Source Colab Docs</a>
             </div>
           </div>
-          {/* <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-auto rounded-full"
-                  onClick={() => setOpen(true)}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">New message</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent sideOffset={10}>New message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider> */}
         </CardHeader>
         <CardContent className="max-h-96 overflow-y-scroll">
           <div className="space-y-4">
@@ -160,20 +110,48 @@ export function CardsChat() {
             <div className="">
               <label htmlFor="attact-image">
                 <input type="file" accept=".jpg, .png" id="attact-image" className="bg-transparent hidden" />
-                <Button type="button" size="icon" className="bg-transparent">
-                  <ImageIcon className="h-4 w-4" />
-                  <span className="sr-only">Attach Image</span>
-                </Button>
               </label>
             </div>
-            <Input
-              id="message"
-              placeholder="Type your message..."
-              className="flex-1"
-              autoComplete="off"
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-            />
+            <Button size="icon" className="bg-transparent"
+              onClick={() => { const inputF = document.getElementById("attact-image"); if (inputF) { inputF.click(); } }}
+            >
+              <ImageIcon className="h-4 w-4" />
+              <span className="sr-only">Attach Image</span>
+            </Button>
+            <Command className="rounded-lg border shadow-md">
+              <CommandInput
+                id="message"
+                placeholder="Type a command or search..."
+                className="flex-1"
+                autoComplete="off"
+                value={input}
+                onValueChange={setInput}
+              />
+              <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {
+                    commands.map((command) => (
+                      <CommandItem
+                        key={command.command}
+                        onSelect={() => {
+                          setMessages([
+                            ...messages,
+                            {
+                              role: "user",
+                              content: command.command,
+                            },
+                          ])
+                          setInput("")
+                        }}
+                      >
+                        <span>{command.command}</span>
+                      </CommandItem>
+                    ))
+                  }
+                </CommandGroup>
+              </CommandList>
+            </Command>
             <Button type="submit" size="icon" disabled={inputLength === 0}>
               <PaperPlaneIcon className="h-4 w-4" />
               <span className="sr-only">Send</span>
@@ -181,89 +159,6 @@ export function CardsChat() {
           </form>
         </CardFooter>
       </Card>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="gap-0 p-0 outline-none">
-          <DialogHeader className="px-4 pb-4 pt-5">
-            <DialogTitle>New message</DialogTitle>
-            <DialogDescription>
-              Invite a user to this thread. This will create a new group
-              message.
-            </DialogDescription>
-          </DialogHeader>
-          <Command className="overflow-hidden rounded-t-none border-t bg-transparent">
-            <CommandInput placeholder="Search user..." />
-            <CommandList>
-              <CommandEmpty>No users found.</CommandEmpty>
-              <CommandGroup className="p-2">
-                {users.map((user) => (
-                  <CommandItem
-                    key={user.email}
-                    className="flex items-center px-2"
-                    onSelect={() => {
-                      if (selectedUsers.includes(user)) {
-                        return setSelectedUsers(
-                          selectedUsers.filter(
-                            (selectedUser) => selectedUser !== user
-                          )
-                        )
-                      }
-
-                      return setSelectedUsers(
-                        [...users].filter((u) =>
-                          [...selectedUsers, user].includes(u)
-                        )
-                      )
-                    }}
-                  >
-                    <Avatar>
-                      <AvatarImage src={user.avatar} alt="Image" />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-2">
-                      <p className="text-sm font-medium leading-none">
-                        {user.name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                    {selectedUsers.includes(user) ? (
-                      <CheckIcon className="ml-auto flex h-5 w-5 text-primary" />
-                    ) : null}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-          {/* <DialogFooter className="flex items-center border-t p-4 sm:justify-between">
-            {selectedUsers.length > 0 ? (
-              <div className="flex -space-x-2 overflow-hidden">
-                {selectedUsers.map((user) => (
-                  <Avatar
-                    key={user.email}
-                    className="inline-block border-2 border-background"
-                  >
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>{user.name[0]}</AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Select users to add to this thread.
-              </p>
-            )}
-            <Button
-              disabled={selectedUsers.length < 2}
-              onClick={() => {
-                setOpen(false)
-              }}
-            >
-              Continue
-            </Button>
-          </DialogFooter> */}
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

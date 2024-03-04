@@ -24,7 +24,7 @@ export function Chat() {
           }
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] mr-6 mb-6" onCloseAutoFocus={() => setOpen(false)}>
+      <PopoverContent className="w-[800px] h-[600px] mr-6 mb-6" onCloseAutoFocus={() => setOpen(false)}>
         <CardsChat />
       </PopoverContent>
     </Popover>

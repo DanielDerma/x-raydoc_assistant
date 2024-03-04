@@ -1,4 +1,3 @@
-import { ImageIcon, PaperPlaneIcon } from "@radix-ui/react-icons"
 import * as React from "react"
 
 import {
@@ -6,7 +5,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -15,28 +13,67 @@ import {
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-import { Input } from "./ui/input"
-import {
-  CalendarIcon,
-  EnvelopeClosedIcon,
-  FaceIcon,
-  GearIcon,
-  PersonIcon,
-  RocketIcon,
-} from "@radix-ui/react-icons"
 
 import {
-  Command,
   CommandEmpty,
+  Command,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
+  CommandList
 } from "@/components/ui/command"
 
-const commands = [
+import Image from "next/image"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip"
+import { Button } from "./ui/button"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+import { Check, Plus } from "lucide-react"
+
+const users = [
+  {
+    name: "X-RayDoc Assistant",
+    email: "Free",
+    avatar: "/avatars/01.png",
+  },
+  {
+    name: "Isabella Nguyen",
+    email: "Paid Plan",
+    avatar: "/avatars/03.png",
+  },
+  {
+    name: "Emma Wilson",
+    email: "Paid Plan",
+    avatar: "/avatars/05.png",
+  },
+  {
+    name: "Jackson Lee",
+    email: "Paid Plan",
+    avatar: "/avatars/02.png",
+  },
+  {
+    name: "William Kim",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+] as const
+
+type User = (typeof users)[number]
+
+const commandsGetStarted = [
   {
     command: "/key_kaggle",
     description: "Get Kaggle API Key",
@@ -47,10 +84,25 @@ const commands = [
   },
 ] as const
 
-type Command = (typeof commands)[number]
+const commands = [
+  {
+    command: "/uploadImage",
+    description: "Upload an image to analyze",
+  },
+] as const
+
+type CommandGetStarted = (typeof commandsGetStarted)[number]
+
+type Message = {
+  role: "agent" | "user",
+  content: string,
+  image?: string,
+}
 
 export function CardsChat() {
-  const [messages, setMessages] = React.useState([
+  const [open, setOpen] = React.useState(false)
+  const [selectedUsers, setSelectedUsers] = React.useState<User>(users[0])
+  const [messages, setMessages] = React.useState<Message[]>([
     {
       role: "agent",
       content: "To get started, type /key_kaggle and /key_colab.",
@@ -61,7 +113,7 @@ export function CardsChat() {
 
   return (
     <>
-      <Card>
+      <Card className="h-full flex flex-col">
         <CardHeader className="flex flex-row items-center">
           <div className="flex items-center space-x-4">
             <Avatar>
@@ -69,12 +121,28 @@ export function CardsChat() {
               <AvatarFallback>XA</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium leading-none">X-RayDoc Assistant</p>
-              <a target="_blank" href="https://www.google.com/maps" className="text-sm text-muted-foreground underline">Open Source Colab Docs</a>
+              <p className="text-sm font-medium leading-none">{selectedUsers.name}</p>
+              <a target="_blank" href="https://colab.research.google.com/github/mohd-faizy/09P_Detecting_COVID_19_with_Chest_X-Ray_using_PyTorch/blob/master/01_Detecting_COVID_19_with_Chest_X_Ray_using_PyTorch.ipynb#scrollTo=i77I2uWzJfPD" className="text-sm text-muted-foreground underline">{selectedUsers.email}</a>
             </div>
           </div>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="ml-auto rounded-full"
+                  onClick={() => setOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="sr-only">More Tools</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={10}>More Tools</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardHeader>
-        <CardContent className="max-h-96 overflow-y-scroll">
+        <CardContent className="">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -87,11 +155,16 @@ export function CardsChat() {
                 )}
               >
                 {message.content}
+                {message.image && (
+                  <div className="flex items-center space-x-2">
+                    <Image src={message.image} alt="Image" className="w-24 h-24" width={96} height={96} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="mt-auto w-full">
           <form
             onSubmit={(event) => {
               event.preventDefault()
@@ -112,26 +185,20 @@ export function CardsChat() {
                 <input type="file" accept=".jpg, .png" id="attact-image" className="bg-transparent hidden" />
               </label>
             </div>
-            <Button size="icon" className="bg-transparent"
-              onClick={() => { const inputF = document.getElementById("attact-image"); if (inputF) { inputF.click(); } }}
-            >
-              <ImageIcon className="h-4 w-4" />
-              <span className="sr-only">Attach Image</span>
-            </Button>
             <Command className="rounded-lg border shadow-md">
               <CommandInput
                 id="message"
-                placeholder="Type a command or search..."
+                placeholder="Type a command or message..."
                 className="flex-1"
                 autoComplete="off"
                 value={input}
                 onValueChange={setInput}
               />
-              <CommandList>
+              {/* <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup>
+                <CommandGroup heading="Get started">
                   {
-                    commands.map((command) => (
+                    commandsGetStarted.map((command) => (
                       <CommandItem
                         key={command.command}
                         onSelect={() => {
@@ -150,15 +217,102 @@ export function CardsChat() {
                     ))
                   }
                 </CommandGroup>
-              </CommandList>
+                <CommandGroup heading="Commands">
+                  {
+                    commands.map((command) => (
+                      <CommandItem
+                        key={command.command}
+                        onSelect={() => {
+                          const pre: Message[] = [
+                            ...messages,
+                            {
+                              role: "user",
+                              content: command.command,
+                            },
+                          ]
+                          setMessages(pre)
+                          if (command.command === "/uploadImage") {
+                            const inputF = document.getElementById("attact-image");
+                            if (inputF) {
+                              inputF.click();
+
+                              inputF.onchange = function (e) {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = function (e) {
+                                    const image = e.target?.result;
+                                    setMessages([
+                                      ...pre,
+                                      {
+                                        role: "user",
+                                        content: "",
+                                        image: image as string,
+                                      },
+                                    ])
+                                  }
+                                  reader.readAsDataURL(file);
+                                }
+                              }
+                            }
+                          }
+                          setInput("")
+                        }}
+                      >
+                        <span>{command.command}</span>
+                      </CommandItem>
+                    ))
+                  }
+                </CommandGroup>
+              </CommandList> */}
             </Command>
-            <Button type="submit" size="icon" disabled={inputLength === 0}>
-              <PaperPlaneIcon className="h-4 w-4" />
-              <span className="sr-only">Send</span>
-            </Button>
           </form>
         </CardFooter>
       </Card>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="gap-0 p-0 outline-none">
+          <DialogHeader className="px-4 pb-4 pt-5">
+            <DialogTitle>Tools</DialogTitle>
+            <DialogDescription>
+
+            </DialogDescription>
+          </DialogHeader>
+          <Command className="overflow-hidden rounded-t-none border-t">
+            <CommandInput placeholder="Search for a tool..." />
+            <CommandList>
+              <CommandEmpty>No users found.</CommandEmpty>
+              <CommandGroup className="p-2">
+                {users.map((user) => (
+                  <CommandItem
+                    key={user.email}
+                    className="flex items-center px-2"
+                    onSelect={() => {
+                      setSelectedUsers(user)
+                      setOpen(false)
+                    }}
+                  >
+                    <Avatar>
+                      <AvatarImage src={user.avatar} alt="Image" />
+                      <AvatarFallback>{user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="ml-2">
+                      <p className="text-sm font-medium leading-none">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    {selectedUsers.email === user.email ? (
+                      <Check className="ml-auto flex h-5 w-5 text-primary" />
+                    ) : null}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

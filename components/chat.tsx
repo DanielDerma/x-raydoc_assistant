@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-
 import {
   CommandEmpty,
   Command,
@@ -30,7 +29,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip"
-import { Button } from "./ui/button"
 
 import {
   Dialog,
@@ -43,29 +41,64 @@ import {
 
 import { Check, Plus } from "lucide-react"
 
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+
+
 const users = [
   {
-    name: "X-RayDoc Assistant",
+    name: "Chest X-Ray Analysis for COVID-19",
     email: "Free",
     avatar: "/avatars/01.png",
   },
   {
-    name: "Isabella Nguyen",
+    name: "MedQuery Analyzer",
     email: "Paid Plan",
     avatar: "/avatars/03.png",
   },
   {
-    name: "Emma Wilson",
+    name: "SymptomMapper",
     email: "Paid Plan",
     avatar: "/avatars/05.png",
   },
   {
-    name: "Jackson Lee",
+    name: "TreatmentAdvisor",
     email: "Paid Plan",
     avatar: "/avatars/02.png",
   },
   {
-    name: "William Kim",
+    name: "DrugInteractionChecker",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "HealthTracker Integration",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "ClinicalTrialNavigator",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "WellnessCoach Module",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "Telemedicine Scheduler",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "LanguageTranslator",
+    email: "Paid Plan",
+    avatar: "/avatars/04.png",
+  },
+  {
+    name: "SecureDataVault",
     email: "Paid Plan",
     avatar: "/avatars/04.png",
   },
@@ -75,19 +108,19 @@ type User = (typeof users)[number]
 
 const commandsGetStarted = [
   {
-    command: "/key_kaggle",
-    description: "Get Kaggle API Key",
-  },
-  {
-    command: "/key_colab",
-    description: "Get G Colab API Key",
-  },
+    command: "/password",
+    description: "Put your password",
+  }
 ] as const
 
 const commands = [
   {
     command: "/uploadImage",
     description: "Upload an image to analyze",
+  },
+  {
+    command: "/notification",
+    description: "Set a notification",
   },
 ] as const
 
@@ -101,24 +134,78 @@ type Message = {
 
 export function CardsChat() {
   const [open, setOpen] = React.useState(false)
+  const [onGetPassword, setOnGetPassword] = React.useState(false)
+  const [autorized, setAutorized] = React.useState(false)
   const [selectedUsers, setSelectedUsers] = React.useState<User>(users[0])
   const [messages, setMessages] = React.useState<Message[]>([
     {
       role: "agent",
-      content: "To get started, type /key_kaggle and /key_colab.",
+      content: "Run the get started commands to get started.",
     }
   ])
   const [input, setInput] = React.useState("")
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (inputLength === 0) return
+    setMessages([
+      ...messages,
+      {
+        role: "user",
+        content: input,
+      },
+    ])
+    setInput("")
+  }
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    console.count("handleKeyPress")
+    if (event.key === "Enter" && inputLength > 0) {
+      if (onGetPassword) {
+        if (input === password) {
+          setMessages([
+            ...messages,
+            {
+              role: "user",
+              content: input,
+            },
+            {
+              role: "agent",
+              content: "Password is correct",
+            },
+          ])
+          setOnGetPassword(false)
+          setAutorized(true)
+        } else {
+          setMessages([
+            ...messages,
+            {
+              role: "user",
+              content: input,
+            },
+            {
+              role: "agent",
+              content: "Password is incorrect",
+            },
+          ])
+        }
+      }
+      setInput("")
+    }
+  }
+
+  const password = "123456"
+
   const inputLength = input.trim().length
 
   return (
     <>
-      <Card className="h-full flex flex-col">
+      <Card className="flex flex-col h-[600px] overflow-y-auto">
         <CardHeader className="flex flex-row items-center">
           <div className="flex items-center space-x-4">
             <Avatar>
               <AvatarImage src="/avatars/01.png" alt="Image" />
-              <AvatarFallback>XA</AvatarFallback>
+              <AvatarFallback>{selectedUsers.name[0]}</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-sm font-medium leading-none">{selectedUsers.name}</p>
@@ -166,18 +253,7 @@ export function CardsChat() {
         </CardContent>
         <CardFooter className="mt-auto w-full">
           <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              if (inputLength === 0) return
-              setMessages([
-                ...messages,
-                {
-                  role: "user",
-                  content: input,
-                },
-              ])
-              setInput("")
-            }}
+            onSubmit={handleSubmit}
             className="flex w-full items-center space-x-2"
           >
             <div className="">
@@ -193,23 +269,34 @@ export function CardsChat() {
                 autoComplete="off"
                 value={input}
                 onValueChange={setInput}
+                onKeyUpCapture={handleKeyPress}
               />
-              {/* <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
+              <CommandList>
                 <CommandGroup heading="Get started">
                   {
                     commandsGetStarted.map((command) => (
                       <CommandItem
                         key={command.command}
                         onSelect={() => {
-                          setMessages([
+
+                          let pre: Message[] = [
                             ...messages,
                             {
                               role: "user",
                               content: command.command,
                             },
-                          ])
+                          ]
                           setInput("")
+                          if (command.command === "/password") {
+                            setOnGetPassword(true)
+                            setMessages([
+                              ...pre,
+                              {
+                                role: "agent",
+                                content: "Enter your password",
+                              },
+                            ])
+                          }
                         }}
                       >
                         <span>{command.command}</span>
@@ -223,7 +310,7 @@ export function CardsChat() {
                       <CommandItem
                         key={command.command}
                         onSelect={() => {
-                          const pre: Message[] = [
+                          let pre: Message[] = [
                             ...messages,
                             {
                               role: "user",
@@ -232,16 +319,27 @@ export function CardsChat() {
                           ]
                           setMessages(pre)
                           if (command.command === "/uploadImage") {
+                            if (!autorized) {
+                              setMessages([
+                                ...pre,
+                                {
+                                  role: "agent",
+                                  content: "You are not authorized to upload an image",
+                                }]
+                              )
+                              return
+                            }
                             const inputF = document.getElementById("attact-image");
                             if (inputF) {
                               inputF.click();
 
                               inputF.onchange = function (e) {
                                 const file = (e.target as HTMLInputElement).files?.[0];
+                                const fileName = file?.name ?? "";
                                 if (file) {
                                   const reader = new FileReader();
                                   reader.onload = function (e) {
-                                    const image = e.target?.result;
+                                    const image = e.target?.result
                                     setMessages([
                                       ...pre,
                                       {
@@ -250,11 +348,32 @@ export function CardsChat() {
                                         image: image as string,
                                       },
                                     ])
+                                    pre.push({
+                                      role: "user",
+                                      content: "",
+                                      image: image as string,
+                                    })
+                                    setMessages([
+                                      ...pre,
+                                      {
+                                        role: "agent",
+                                        content: fileName === "COVID-1.png" ? "COVID-19 detected in 96.5%" : "COVID-19 not detected",
+                                      },
+                                    ])
                                   }
                                   reader.readAsDataURL(file);
                                 }
                               }
                             }
+                          }
+                          if (command.command === "/notification") {
+                            toast("Event has been created", {
+                              description: "Sunday, December 03, 2023 at 9:00 AM",
+                              action: {
+                                label: "Undo",
+                                onClick: () => console.log("Undo"),
+                              },
+                            })
                           }
                           setInput("")
                         }}
@@ -264,7 +383,7 @@ export function CardsChat() {
                     ))
                   }
                 </CommandGroup>
-              </CommandList> */}
+              </CommandList>
             </Command>
           </form>
         </CardFooter>
